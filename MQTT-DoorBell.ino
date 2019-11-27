@@ -5,12 +5,14 @@
 #include <SimpleTimer.h> //https://github.com/jfturcot/SimpleTimer
 #include <ArduinoOTA.h> //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 #include "config.h";
+#include "DHT.h"
 
 // Dependances Setup
 //----------------------------------------------------------------------
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 SimpleTimer timer;
+DHT dht;
 bool boot = true;
 
 
@@ -21,6 +23,7 @@ const int playBellPin = 5;
 //other pins
 const int pirPIN = 12;
 int PIR;
+const int dhtPIN = 4;
 
 
 
@@ -180,27 +183,23 @@ void postActiveSenors() {
 
 void postPassiveSenors ()
 {
-  // float humidity =  0;
-  // humidity = dht.getHumidity();                                 // Get humidity value
-  // float temperature = dht.getTemperature();                     // Get temperature value
-  
-  // if (dht.getStatusString() == "OK") {
+  float humidity =  0;
+  humidity = dht.getHumidity();                                 // Get humidity value
+  float temperature = dht.getTemperature();                     // Get temperature value
+  StaticJsonDocument<200> doc;
 
-    StaticJsonDocument<200> doc;
-    //JsonObject& doc = doc.createObject();
-    // doc["temperature"] = (String)temperature;
-    // doc["humidity"] = (String)humidity;
+  if (dht.getStatusString() == "OK") {
+    doc["temperature"] = (String)temperature;
+    doc["humidity"] = (String)humidity;
     doc["lightlevel"] = (String)getLightLevel();
-    //root.prettyPrintTo(Serial);
-    
-    char data[200];
-    //doc.printTo(data, measureJson(doc) + 1);
-    serializeJson(doc, data);
-    client.publish(MQTT_SENSOR_TOPIC, data, true);
-    yield();
-  // } else {
-  //   client.publish(_MQTT_SENSOR_TOPIC, dht.getStatusString(), true);
-  // }
+  } else {
+    doc["dhterror"] = dht.getStatusString();
+    doc["lightlevel"] = (String)getLightLevel();
+  }
+  char data[200];
+  serializeJson(doc, data);
+  client.publish(MQTT_SENSOR_TOPIC, data, true);
+  yield();
   
 }
 
@@ -225,6 +224,7 @@ void setup() {
   pinMode(playBellPin, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
+  dht.setup(dhtPIN);
 
 
   // init the WiFi connection
