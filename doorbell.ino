@@ -10,10 +10,13 @@ void getDoorBell()
 void resetDoorBellTriggered()
 {
   alreadyTriggered = false;
+  client.publish(MQTT_DOORBELL_STATE_TOPIC, "OFF");
 }
 
 
+
 void playBell() {
+  client.publish(MQTT_DOORBELL_STATE_TOPIC,"Play Doorbell", true);
   alreadyTriggered = true;
   timer.setTimeout(6000, resetDoorBellTriggered); // wait 6 second before triggering
   int d = 200;

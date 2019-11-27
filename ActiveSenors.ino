@@ -1,4 +1,4 @@
-int PIR;
+int PIR =-1;
 
 int postBoolStatus(int oldstatus, int newStatus, char* topic)
 { 

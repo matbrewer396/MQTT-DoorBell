@@ -1,6 +1,7 @@
 void checkIn()
 {
   client.publish(MQTT_CHECKIN_TOPIC,"OK");
+  client.publish(MQTT_DOORBELL_AVAIL,"online");
 }
 
 void reconnect() 
@@ -25,9 +26,9 @@ void reconnect()
         }
         // resubscribe to topic
         client.subscribe(MQTT_DOORBELL_COMMAND_TOPIC);
-        // client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
-
         digitalWrite(LED_BUILTIN, HIGH);
+        // Clear status - force resent
+        PIR =-1;
       } 
       else {
         Serial.print("ERROR: MQTT failed, rc=");
@@ -61,7 +62,6 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
     if (payload == "Play Doorbell")
     {
       playBell();
-      client.publish(MQTT_DOORBELL_STATE_TOPIC,"Play Doorbell", true);
     } else if (payload == "Change Volume")
     {
       changeVol();

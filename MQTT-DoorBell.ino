@@ -67,7 +67,7 @@ void setup() {
   // Confirm status every two minutes
   timer.setInterval(CHECKIN_INTERVAL, checkIn);
   timer.setInterval(100, postActiveSenors);
-  timer.setInterval(5000, postPassiveSenors);
+  timer.setInterval(SENSOR_INTERVAL, postPassiveSenors);
 }
 
 void loop() {
