@@ -36,7 +36,7 @@ void setup() {
   pinMode(doorBellPin, INPUT_PULLDOWN_16);
   pinMode(playBellPin, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, LOW);
   dht.setup(dhtPIN);
 
 
@@ -72,7 +72,7 @@ void setup() {
 
 void loop() {
   if (!client.connected()) {
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
     reconnect();
   }
   client.loop();

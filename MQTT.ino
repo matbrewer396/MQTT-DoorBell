@@ -12,8 +12,9 @@ void reconnect()
     {
         Serial.print("Attempting MQTT connection...");
       // Attempt to connect
-      if (client.connect(DEVICENAME, MQTT_USER, MQTT_PASSWORD)) {
+      if (client.connect(DEVICENAME, MQTT_USER, MQTT_PASSWORD, MQTT_DOORBELL_AVAIL, 0,false,"offline")) {
         Serial.println("INFO: MQTT connected");
+        client.publish(MQTT_DOORBELL_AVAIL,"online");
         // Once connected, publish an announcement...
         if(boot == true) {
           client.publish(MQTT_CHECKIN_TOPIC,"Rebooted");
@@ -26,7 +27,7 @@ void reconnect()
         client.subscribe(MQTT_DOORBELL_COMMAND_TOPIC);
         // client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
 
-        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(LED_BUILTIN, HIGH);
       } 
       else {
         Serial.print("ERROR: MQTT failed, rc=");
@@ -52,8 +53,8 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
   for (uint8_t i = 0; i < p_length; i++) {
     payload.concat((char)p_payload[i]);
   }
-   Serial.print(newTopic);
-   Serial.print(payload);
+  Serial.print(newTopic);
+  Serial.print(payload);
   if (newTopic == MQTT_DOORBELL_COMMAND_TOPIC) 
   {
 
