@@ -16,7 +16,11 @@ bool boot = true;
 // Door Bell
 bool alreadyTriggered = false;
 const int doorBellPin = 16;
-const int playBellPin = 5;  
+const int playBellPin = 5;
+//other pins
+const int pirPIN = 12;
+int PIR;
+
 
 
 void reconnect() 
@@ -149,6 +153,30 @@ void changeVol() {
   delay(d);
 }
 
+int postBoolStatus(int oldstatus, int newStatus, char* topic)
+{ 
+  if( (newStatus != oldstatus || oldstatus == -1) && newStatus == 0)
+  {
+    client.publish(topic,"true", true);    
+    return newStatus;
+  }
+  else if((newStatus != oldstatus || oldstatus == -1) && newStatus == 1)
+  {
+    client.publish(topic,"false", true);
+    return newStatus;
+  }else {
+    return oldstatus;
+  };
+  return newStatus;
+  
+}
+
+
+void readRealTimeSenors() {
+  PIR = postBoolStatus(PIR,digitalRead(pirPIN),MQTT_PIR_TOPIC);
+  getDoorBell();
+}
+
 
 
 void setup() {
@@ -191,7 +219,7 @@ void setup() {
 
   // Confirm status every two minutes
   timer.setInterval(CHECKIN_INTERVAL, checkIn);
-  timer.setInterval(200, getDoorBell);
+  timer.setInterval(100, readRealTimeSenors);
 }
 
 void loop() {
@@ -202,6 +230,5 @@ void loop() {
   client.loop();
   ArduinoOTA.handle();
   timer.run();
-  
 
 }
