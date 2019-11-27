@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <SimpleTimer.h> //https://github.com/jfturcot/SimpleTimer
@@ -172,11 +173,44 @@ int postBoolStatus(int oldstatus, int newStatus, char* topic)
 }
 
 
-void readRealTimeSenors() {
+void postActiveSenors() {
   PIR = postBoolStatus(PIR,digitalRead(pirPIN),MQTT_PIR_TOPIC);
   getDoorBell();
 }
 
+void postPassiveSenors ()
+{
+  // float humidity =  0;
+  // humidity = dht.getHumidity();                                 // Get humidity value
+  // float temperature = dht.getTemperature();                     // Get temperature value
+  
+  // if (dht.getStatusString() == "OK") {
+
+    StaticJsonDocument<200> doc;
+    //JsonObject& doc = doc.createObject();
+    // doc["temperature"] = (String)temperature;
+    // doc["humidity"] = (String)humidity;
+    doc["lightlevel"] = (String)getLightLevel();
+    //root.prettyPrintTo(Serial);
+    
+    char data[200];
+    //doc.printTo(data, measureJson(doc) + 1);
+    serializeJson(doc, data);
+    client.publish(MQTT_SENSOR_TOPIC, data, true);
+    yield();
+  // } else {
+  //   client.publish(_MQTT_SENSOR_TOPIC, dht.getStatusString(), true);
+  // }
+  
+}
+
+
+// Get light level
+float getLightLevel() {
+  int sensorValue = analogRead(A0);                               // read the input on analog pin 0
+  float lightLevel = (sensorValue * (3.3 / 1023.0))/3.000 *100;   // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V) - Then to percentages
+  return lightLevel;
+}
 
 
 void setup() {
@@ -219,7 +253,8 @@ void setup() {
 
   // Confirm status every two minutes
   timer.setInterval(CHECKIN_INTERVAL, checkIn);
-  timer.setInterval(100, readRealTimeSenors);
+  timer.setInterval(100, postActiveSenors);
+  timer.setInterval(5000, postPassiveSenors);
 }
 
 void loop() {
