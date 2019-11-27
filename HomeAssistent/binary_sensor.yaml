@@ -1,0 +1,14 @@
+  - platform: mqtt
+    name: "Office Motion"
+    state_topic: "doorbell/pir"
+    availability_topic: "availability/doorbell"
+    payload_available: "online"
+    payload_not_available: "offline"
+    payload_on: "false"
+    payload_off: "true"
+    device_class: motion
+  - platform: mqtt
+    name: "DoorBell Status"
+    state_topic: "availability/doorbell"
+    payload_on: "online"
+    payload_off: "offline"
